@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>OS Simulation</title>
+    <link rel="stylesheet" href="n.css">
+    <link rel="stylesheet" href="m.css">
+    <link rel="stylesheet" href="all.css">
+</head>
+
+<body>
+    <header>
+        <h1>Mini OS Simulation</h1>
+    </header>
+    <div class="container">
+        <div class="buttons">
+            <button class="process-btn active" onclick="showTab('process')">Process</button>
+            <button class="memory-btn" onclick="showTab('memory')">Memory</button>
+            <button class="file-btn" onclick="showTab('file')">File System</button>
+            <button class="devices-btn" onclick="showTab('devices')">I/O Devices</button>
+        </div>
+        <div class="content">
+            <!-- Process Tab -->
+            <div class="process-content tab-content active" id="process">
+                <h3>Process Management</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PID</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Memory</th>
+                            <th>Threads</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="processTableBody"></tbody>
+                </table>
+                <div class="card">
+                    <h4><i class="fa-solid fa-circle-info"></i> How Processes Work</h4>
+                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">
+                        Processes are created automatically when you launch applications from the
+                        <strong>I/O Devices</strong> tab. Click any app icon to start a new process.
+                        <br><br> Use the <strong>Actions</strong> below to Suspend, Resume, or Kill running processes.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Memory Tab -->
+            <div class="memory-content tab-content" id="memory">
+                <h3>Memory Management</h3>
+                <div class="ram-progress card">
+                    <h4>RAM Usage: <span id="usedRamText">0</span> MB / <span id="totalRamText">2048</span> MB</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="ramProgressBar" style="width: 0%;"></div>
+                        <span class="progress-text" id="ramProgressText">0% Used</span>
+                    </div>
+                </div>
+                <div class="memory-table card">
+                    <h4>Memory Blocks:</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Address</th>
+                                <th>Size (MB)</th>
+                                <th>Status</th>
+                                <th>Process</th>
+                            </tr>
+                        </thead>
+                        <tbody id="memoryTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="manage-memory">
+                    <div class="deallocate card">
+                        <h4>Terminate Process:</h4>
+                        <div class="form-group">
+                            <label for="current-processes">Current Processes:</label>
+                            <select id="current-processes">
+                                <option value="">No processes running</option>
+                            </select>
+                            <button class="btn-primary" onclick="deallocateProcess()">Deallocate</button>
+                        </div>
+                        <p class="hint">Terminate the selected process and free its allocated memory</p>
+                    </div>
+                    <div class="defragment card">
+                        <div class="form-group">
+                            <h4>Optimize Memory:</h4>
+                            <button class="btn-primary" onclick="defragmentMemory()">Defragment</button>
+                            <p class="hint">Compacts all free memory into one continuous block</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File System Tab -->
+            <div class="file-content tab-content" id="file">
+                <h3>File System</h3>
+                <div class="disk-progress card">
+                    <h4>Disk Space - Total: <span id="totalDisk">1024</span> MB</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill blue" id="diskProgressBar" style="width: 0%;"></div>
+                    </div>
+                    <div class="disk-stats">
+                        <span>Used: <span id="usedDisk">0</span> MB</span>
+                        <span>Free: <span id="freeDisk">1024</span> MB</span>
+                    </div>
+                    <div class="file-table card">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Size (MB)</th>
+                                    <th>Status</th>
+                                    <th>Created Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fileTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="file-forms">
+                        <div class="create-file card">
+                            <h4>Create New File:</h4>
+                            <div class="form-group">
+                                <label for="fileNameInput">File Name:</label>
+                                <input type="text" id="fileNameInput" placeholder="document.txt">
+                            </div>
+                            <div class="form-group">
+                                <label for="fileSizeInput">Size (MB):</label>
+                                <input type="number" id="fileSizeInput" placeholder="10" min="1">
+                            </div>
+                            <button class="btn-primary" onclick="createFile()">Create</button>
+                        </div>
+                        <div class="change-status card">
+                            <h4>Change File Status:</h4>
+                            <div class="form-group">
+                                <label for="fileSelectStatus">File Name:</label>
+                                <select id="fileSelectStatus">
+                                    <option value="">No files</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="fileStatusSelect">Status:</label>
+                                <select id="fileStatusSelect">
+                                    <option value="Open">Open</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                            </div>
+                            <button class="btn-primary" onclick="changeFileStatus()">Update</button>
+                        </div>
+                        <div class="delete-file card">
+                            <h4>Delete File:</h4>
+                            <div class="form-group">
+                                <label for="fileSelectDelete">File Name:</label>
+                                <select id="fileSelectDelete">
+                                    <option value="">No files</option>
+                                </select>
+                            </div>
+                            <button class="btn-danger" onclick="deleteFile()">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- I/O Devices Tab -->
+            <div class="tab-content" id="devices">
+                <div class="desktop-container card">
+                    <button class="show-processes-btn" id="showProcessesBtn">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Process Monitor</span>
+                    </button>
+                    <div class="desktop-screen">
+                        <div class="apps-grid">
+                            <div class="app-icon" data-app="Chrome" data-load-time="3">
+                                <i class="fa-brands fa-chrome"></i>
+                                <span>Chrome</span>
+                            </div>
+                            <div class="app-icon" data-app="VSCode" data-load-time="2.5">
+                                <i class="fa-solid fa-code"></i>
+                                <span>VS Code</span>
+                            </div>
+                            <div class="app-icon" data-app="Photoshop" data-load-time="4">
+                                <i class="fa-solid fa-image"></i>
+                                <span>Photoshop</span>
+                            </div>
+                            <div class="app-icon" data-app="Spotify" data-load-time="2">
+                                <i class="fa-brands fa-spotify"></i>
+                                <span>Spotify</span>
+                            </div>
+                            <div class="app-icon" data-app="Word" data-load-time="1.8">
+                                <i class="fa-solid fa-file-word"></i>
+                                <span>Word</span>
+                            </div>
+                            <div class="app-icon" data-app="Excel" data-load-time="2.2">
+                                <i class="fa-solid fa-file-excel"></i>
+                                <span>Excel</span>
+                            </div>
+                            <div class="app-icon" data-app="Firefox" data-load-time="2.8">
+                                <i class="fa-brands fa-firefox-browser"></i>
+                                <span>Firefox</span>
+                            </div>
+                            <div class="app-icon" data-app="Premiere" data-load-time="5">
+                                <i class="fa-solid fa-film"></i>
+                                <span>Premiere</span>
+                            </div>
+                            <div class="app-icon" data-app="Notepad" data-load-time="0.8">
+                                <i class="fa-solid fa-file-lines"></i>
+                                <span>Notepad</span>
+                            </div>
+                            <div class="app-icon" data-app="Calculator" data-load-time="0.5">
+                                <i class="fa-solid fa-calculator"></i>
+                                <span>Calculator</span>
+                            </div>
+                            <div class="app-icon" data-app="Terminal" data-load-time="0.6">
+                                <i class="fa-solid fa-terminal"></i>
+                                <span>Terminal</span>
+                            </div>
+                            <div class="app-icon" data-app="Discord" data-load-time="1.5">
+                                <i class="fa-brands fa-discord"></i>
+                                <span>Discord</span>
+                            </div>
+                            <div class="app-icon" data-app="Edge" data-load-time="2.5">
+                                <i class="fa-brands fa-edge"></i>
+                                <span>Edge</span>
+                            </div>
+                            <div class="app-icon" data-app="PowerPoint" data-load-time="2">
+                                <i class="fa-solid fa-file-powerpoint"></i>
+                                <span>PowerPoint</span>
+                            </div>
+                            <div class="app-icon" data-app="Slack" data-load-time="1.8">
+                                <i class="fa-brands fa-slack"></i>
+                                <span>Slack</span>
+                            </div>
+                            <div class="app-icon" data-app="Zoom" data-load-time="2.3">
+                                <i class="fa-solid fa-video-camera"></i>
+                                <span>Zoom</span>
+                            </div>
+                        </div>
+                        <!-- Process Modal -->
+                        <div class="process-modal-overlay" id="processModal">
+                            <div class="process-modal">
+                                <div class="modal-header">
+                                    <h3><i class="fa-solid fa-microchip"></i> Running Processes</h3>
+                                    <button class="close-modal" id="closeModal">×</button>
+                                </div>
+                                <div class="modal-body" id="processModalBody">
+                                    <div class="no-process">No processes running. Launch an app from desktop.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Devices Table -->
+                    <div class="devices-section">
+                        <h4><i class="fa-solid fa-hard-drive"></i> Physical I/O Devices Status</h4>
+                        <div class="devices-table-wrapper card">
+                            <table class="devices-table" id="devicesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Device</th>
+                                        <th>Status</th>
+                                        <th>Used by</th>
+                                        <th>Queue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr data-device="Keyboard">
+                                        <td>Keyboard</td>
+                                        <td><span class="status-badge idle">Idle</span></td>
+                                        <td class="used-by">-</td>
+                                        <td class="queue-count">0</td>
+                                    </tr>
+                                    <tr data-device="Mouse">
+                                        <td>Mouse</td>
+                                        <td><span class="status-badge idle">Idle</span></td>
+                                        <td class="used-by">-</td>
+                                        <td class="queue-count">0</td>
+                                    </tr>
+                                    <tr data-device="Printer">
+                                        <td>Printer</td>
+                                        <td><span class="status-badge idle">Idle</span></td>
+                                        <td class="used-by">-</td>
+                                        <td class="queue-count">0</td>
+                                    </tr>
+                                    <tr data-device="Disk">
+                                        <td>Disk</td>
+                                        <td><span class="status-badge idle">Idle</span></td>
+                                        <td class="used-by">-</td>
+                                        <td class="queue-count">0</td>
+                                    </tr>
+                                    <tr data-device="Scanner">
+                                        <td>Scanner</td>
+                                        <td><span class="status-badge idle">Idle</span></td>
+                                        <td class="used-by">-</td>
+                                        <td class="queue-count">0</td>
+                                    </tr>
+                                    <tr data-device="Speaker">
+                                        <td>Speaker</td>
+                                        <td><span class="status-badge idle">Idle</span></td>
+                                        <td class="used-by">-</td>
+                                        <td class="queue-count">0</td>
+                                    </tr>
+                                    <tr data-device="Webcam">
+                                        <td>Webcam</td>
+                                        <td><span class="status-badge idle">Idle</span></td>
+                                        <td class="used-by">-</td>
+                                        <td class="queue-count">0</td>
+                                    </tr>
+                                    <tr data-device="Microphone">
+                                        <td>Microphone</td>
+                                        <td><span class="status-badge idle">Idle</span></td>
+                                        <td class="used-by">-</td>
+                                        <td class="queue-count">0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <h5>CPU: <span class="cpu-span">0</span>%</h5>
+        <h5>RAM: <span class="ram-span">0</span> MB / 2048 MB</h5>
+        <h5>Processes: <span class="process-span">0</span></h5>
+        <h5>Time: <span class="time-span">00:00</span></h5>
+    </footer>
+
+    <script src="s.js"></script>
+</body>
+
+</html>
